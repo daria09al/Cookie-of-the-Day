@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="day">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+
+  <!-- iOS / PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Печенька дня">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#ffe3ea" id="themeColor">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+
+  <title>Печенька дня ♡</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap"
+    rel="stylesheet">
+  <link rel="preload" href="fonts/dynapuff-num-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ================= ФОН ================= -->
+  <div class="sky" aria-hidden="true">
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+    <div class="stars" id="stars"></div>
+    <div class="moon">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="34" fill="#fff5d6" />
+        <circle cx="38" cy="42" r="5" fill="#f0e2b8" />
+        <circle cx="60" cy="58" r="7" fill="#f0e2b8" />
+        <circle cx="58" cy="34" r="3.5" fill="#f0e2b8" />
+      </svg>
+    </div>
+    <div class="sun"></div>
+    <div class="floaties" id="floaties"></div>
+  </div>
+
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <!-- ================= КОНТЕНТ ================= -->
+  <div class="app">
+
+    <header class="head">
+      <h1 id="siteTitle" title="Печенька дня">Печенька&nbsp;дня <span class="hh">♡</span></h1>
+      <p class="tagline" id="tagline">твоё маленькое волшебство каждый день</p>
+    </header>
+
+    <main class="stage">
+
+      <!-- Печенька -->
+      <div class="cookie-zone">
+        <div class="cookie-shadow"></div>
+
+        <button class="cookie" id="cookie" aria-label="Открыть печенье с предсказанием">
+          <span class="half half-l">
+            <svg viewBox="0 0 200 200">
+              <defs>
+                <linearGradient id="gl" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#ffd9a3" />
+                  <stop offset="1" stop-color="#e9a86a" />
+                </linearGradient>
+              </defs>
+              <path d="M100,18 A82,82 0 0,0 100,182 L91,160 L106,140 L89,120 L107,100 L90,80 L105,60 L95,40 Z"
+                fill="url(#gl)" stroke="#c9854a" stroke-width="4" stroke-linejoin="round" />
+              <circle cx="62" cy="70" r="7" fill="#8b5a33" opacity=".75" />
+              <circle cx="48" cy="112" r="5.5" fill="#8b5a33" opacity=".65" />
+              <circle cx="74" cy="134" r="6" fill="#8b5a33" opacity=".7" />
+              <circle cx="70" cy="44" r="4" fill="#8b5a33" opacity=".55" />
+            </svg>
+          </span>
+
+          <span class="half half-r">
+            <svg viewBox="0 0 200 200">
+              <defs>
+                <linearGradient id="gr" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ffd9a3" />
+                  <stop offset="1" stop-color="#e9a86a" />
+                </linearGradient>
+              </defs>
+              <path d="M100,18 A82,82 0 0,1 100,182 L109,160 L94,140 L111,120 L93,100 L110,80 L95,60 L105,40 Z"
+                fill="url(#gr)" stroke="#c9854a" stroke-width="4" stroke-linejoin="round" />
+              <circle cx="138" cy="76" r="7" fill="#8b5a33" opacity=".75" />
+              <circle cx="152" cy="118" r="5.5" fill="#8b5a33" opacity=".65" />
+              <circle cx="126" cy="140" r="6" fill="#8b5a33" opacity=".7" />
+              <circle cx="130" cy="48" r="4" fill="#8b5a33" opacity=".55" />
+            </svg>
+          </span>
+
+          <span class="sparkle s1">✦</span>
+          <span class="sparkle s2">✧</span>
+          <span class="sparkle s3">✦</span>
+          <span class="hint" id="cookieHint">нажми на меня</span>
+        </button>
+
+        <!-- Записка -->
+        <div class="note" id="note" aria-live="polite">
+          <div class="note-paper">
+            <span class="note-deco">✿</span>
+            <p class="note-text" id="noteText"></p>
+            <span class="note-sign">— с любовью</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Таймер -->
+      <section class="timer hidden" id="timer">
+        <div class="timer-ring">
+          <svg viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52" />
+            <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" />
+          </svg>
+          <div class="ring-mid">
+            <span class="ring-ico" id="ringIco">🌙</span>
+            <span class="ring-cd" id="countdown">00:00:00</span>
+          </div>
+        </div>
+        <p class="timer-txt">Новое предсказание появится в <b id="nextTime">--:--</b> ♡</p>
+        <p class="timer-sub" id="timerSub">Печенька отдыхает и набирается волшебства</p>
+      </section>
+
+    </main>
+
+    <!-- Кнопки -->
+    <div class="actions">
+      <button class="btn btn-primary" id="hugBtn">
+        <span class="btn-ico"></span> Отправить обнимашку
+      </button>
+      <div class="btn-row">
+        <button class="btn btn-soft" id="historyBtn"><span class="btn-ico">📖</span> История</button>
+        <button class="btn btn-soft" id="whisperBtn"><span class="btn-ico">💌</span> Шепнуть <span
+            id="whisperName">тебе</span></button>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span id="footClock">--:--</span> · <span id="footTheme">день</span>
+      <span class="secret-dot" id="secretDot" aria-hidden="true"></span>
+    </footer>
+  </div>
+
+  <!-- ================= ПИТОМЕЦ ================= -->
+  <div class="pet-wrap">
+    <div class="bubble" id="petBubble"></div>
+    <button class="pet" id="pet" aria-label="Погладить питомца">
+      <svg viewBox="0 0 130 130">
+        <!-- пар (день) -->
+        <g class="steam">
+          <path d="M52 26 q7 -9 0 -18" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"
+            opacity=".75" />
+          <path d="M66 22 q7 -10 0 -20" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"
+            opacity=".55" />
+        </g>
+        <!-- Zzz (ночь) -->
+        <g class="zzz">
+          <text x="86" y="30" font-size="18" fill="#fff2c9" font-family="Nunito, sans-serif">z</text>
+          <text x="97" y="18" font-size="13" fill="#fff2c9" font-family="Nunito, sans-serif">z</text>
+        </g>
+        <!-- кружка -->
+        <path class="mug-handle" d="M100 78 q19 8 0 26" fill="none" stroke-width="11" stroke-linecap="round" />
+        <path class="mug-handle-in" d="M100 78 q19 8 0 26" fill="none" stroke-width="5" stroke-linecap="round" />
+        <rect class="mug" x="22" y="68" width="80" height="46" rx="18" />
+        <path class="mug-line" d="M32 90 q30 9 60 0" fill="none" stroke="#ff9ebb" stroke-width="4"
+          stroke-linecap="round" opacity=".5" />
+        <!-- уши -->
+        <path class="fur" d="M40 44 L34 24 L54 34 Z" />
+        <path class="fur" d="M86 44 L92 24 L72 34 Z" />
+        <path class="ear-in" d="M42 42 L39 31 L50 36 Z" />
+        <path class="ear-in" d="M84 42 L87 31 L76 36 Z" />
+        <!-- голова -->
+        <circle class="fur" cx="63" cy="60" r="26" />
+        <ellipse class="blush" cx="47" cy="66" rx="7" ry="4.5" />
+        <ellipse class="blush" cx="79" cy="66" rx="7" ry="4.5" />
+        <!-- глаза открытые -->
+        <g class="eyes-open">
+          <ellipse cx="53" cy="57" rx="3.4" ry="4.6" fill="#4a3040" />
+          <ellipse cx="73" cy="57" rx="3.4" ry="4.6" fill="#4a3040" />
+          <circle cx="54.4" cy="55.4" r="1.2" fill="#fff" />
+          <circle cx="74.4" cy="55.4" r="1.2" fill="#fff" />
+        </g>
+        <!-- глаза закрытые -->
+        <g class="eyes-closed">
+          <path d="M48 58 q5 5 10 0" fill="none" stroke="#4a3040" stroke-width="2.6" stroke-linecap="round" />
+          <path d="M68 58 q5 5 10 0" fill="none" stroke="#4a3040" stroke-width="2.6" stroke-linecap="round" />
+        </g>
+        <!-- носик -->
+        <path d="M60 64 q3 3 6 0" fill="none" stroke="#e0708f" stroke-width="2.2" stroke-linecap="round" />
+        <!-- очки (день) -->
+        <g class="shades">
+          <rect x="44" y="50" width="16" height="11" rx="5" fill="#3c2b4d" />
+          <rect x="66" y="50" width="16" height="11" rx="5" fill="#3c2b4d" />
+          <path d="M60 55 h6" stroke="#3c2b4d" stroke-width="3" />
+          <path d="M46 52 l5 2" stroke="#fff" stroke-width="2" opacity=".5" />
+        </g>
+        <!-- колпак (ночь) -->
+        <g class="cap">
+          <path d="M38 40 q25 -30 50 -2 q-25 -12 -50 2 Z" fill="#b58cf0" />
+          <path d="M86 38 q14 -14 6 -26 q-14 6 -18 20 Z" fill="#9b74e0" />
+          <circle cx="92" cy="10" r="6" fill="#fff0f6" />
+          <path d="M38 40 q25 12 50 -2" fill="none" stroke="#fff0f6" stroke-width="5" stroke-linecap="round" />
+        </g>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ================= ТОСТ ================= -->
+  <div class="toast" id="toast"><span id="toastText"></span></div>
+
+  <!-- ================= МОДАЛКИ ================= -->
+
+  <!-- История -->
+  <div class="modal" id="mHistory" aria-hidden="true">
+    <div class="sheet">
+      <button class="x" data-close>✕</button>
+      <h2>📖 История предсказаний</h2>
+      <p class="sheet-sub" id="historyCount"></p>
+      <div class="list" id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- Шепнуть -->
+  <div class="modal" id="mWhisper" aria-hidden="true">
+    <div class="sheet">
+      <button class="x" data-close>✕</button>
+      <h2>💌 Шепнуть на ушко</h2>
+      <p class="sheet-sub">Напиши пару слов — они долетят ♡</p>
+      <textarea id="whisperText" maxlength="300" rows="4" placeholder="Например: скучаю по тебе..."></textarea>
+      <div class="cnt"><span id="whisperCount">0</span>/300</div>
+      <button class="btn btn-primary w100" id="whisperSend">Отправить шёпот</button>
+    </div>
+  </div>
+
+  <!-- Админка -->
+  <div class="modal" id="mAdmin" aria-hidden="true">
+    <div class="sheet">
+      <button class="x" data-close>✕</button>
+
+      <div id="adminGate">
+        <h2>🔒 Секретный вход</h2>
+        <p class="sheet-sub">Введи PIN-код</p>
+        <input id="pinInput" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8"
+          placeholder="••••" autocomplete="off">
+        <p class="pin-err hidden" id="pinErr">Неверный PIN ✕</p>
+        <button class="btn btn-primary w100" id="pinOk">Войти</button>
+      </div>
+
+      <div id="adminPanel" class="hidden">
+        <h2>👑 Панель управления</h2>
+        <div class="tabs">
+          <button class="tab is-on" data-tab="status">Статус</button>
+          <button class="tab" data-tab="write">Мои фразы</button>
+          <button class="tab" data-tab="log">Открытия</button>
+          <button class="tab" data-tab="inbox">Входящие</button>
+        </div>
+
+        <div class="tab-body" id="tabStatus">
+          <div class="cards" id="statusCards"></div>
+        </div>
+
+        <!-- Свои предсказания -->
+        <div class="tab-body hidden" id="tabWrite">
+          <p class="sheet-sub">Твоя фраза встанет в начало очереди — он увидит именно её, когда откроет следующую
+            печеньку ♡</p>
+
+          <div class="seg" id="fortuneKind">
+            <button class="seg-b is-on" data-kind="any">Любая печенька</button>
+            <button class="seg-b" data-kind="day">☀️ Только днём</button>
+            <button class="seg-b" data-kind="night">🌙 Только вечером</button>
+          </div>
+
+          <textarea id="fortuneText" maxlength="200" rows="3"
+            placeholder="Например: я очень тобой горжусь ♡"></textarea>
+          <div class="cnt"><span id="fortuneCount">0</span>/200</div>
+          <button class="btn btn-primary w100" id="fortuneAdd">＋ Добавить в очередь</button>
+
+          <p class="sheet-sub queue-h" id="queueHead"></p>
+          <div class="list" id="fortuneList"></div>
+        </div>
+
+        <div class="tab-body hidden" id="tabLog">
+          <div class="list" id="adminLog"></div>
+        </div>
+
+        <div class="tab-body hidden" id="tabInbox">
+          <div class="list" id="adminInbox"></div>
+        </div>
+
+        <div class="admin-foot">
+          <button class="btn btn-soft sm" id="adminRefresh">↻ Обновить</button>
+          <button class="btn btn-soft sm" id="adminExport">⤓ Экспорт</button>
+          <button class="btn btn-danger sm" id="adminWipe">Сбросить всё</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Невидимая зона входа в админку -->
+  <div class="admin-hotspot" id="adminHotspot" aria-hidden="true"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
