@@ -15,6 +15,17 @@ const CONFIG = {
   dayStart: 7,     // с 07:00 — день
   nightStart: 20,  // с 20:00 — ночь
 
+  /* Telegram — чтобы видеть с любого устройства, что он сделал.
+     1) @BotFather → /newbot → получи токен
+     2) напиши боту любое сообщение
+     3) открой https://api.telegram.org/bot<ТОКЕН>/getUpdates → возьми chat.id
+     4) enabled: true и вставь token + chatId ниже */
+  telegram: {
+    enabled: true,
+    token: '8800943807:AAH_4qGRvcI8UExZBDC9S1tbaCnrkSz-z7o',
+    chatId: '6237380979'
+  },
+
   sound: true
 };
 
@@ -700,6 +711,9 @@ function openCookie(){
       : 'Вечерняя печенька уже раскрыта ♡';
     tickClock();
   }, 1400);
+
+  const ownMark = customId ? '\n✍️ <i>это твоя фраза</i>' : '';
+  tg(`🍪 <b>Печенька открыта</b>\n${slot.isDay ? '☀️ дневная' : '🌙 вечерняя'} · ${fmtDateTime(Date.now())}${ownMark}\n\n<i>${escapeHtml(text)}</i>`);
 }
 
 /* ---------------------------------------------------------
@@ -798,6 +812,8 @@ function sendHug(){
   Sfx.chime();
   if(navigator.vibrate) navigator.vibrate([14, 30, 14, 30, 22]);
   toast('Обнимашка доставлена! 🤗', 2600);
+
+  tg(`🤗 <b>Обнимашка доставлена</b>\n${fmtDateTime(Date.now())}\nВсего обнимашек: ${list.length}`);
 }
 
 /* ---------------------------------------------------------
@@ -867,6 +883,8 @@ function sendWhisper(){
   heartsBurst(window.innerWidth / 2, window.innerHeight / 2, 8);
   Sfx.whoosh();
   toast('Шёпот отправлен 💌', 2600);
+
+  tg(`💌 <b>Новый шёпот</b>\n${fmtDateTime(Date.now())}\n\n${escapeHtml(text)}`);
 }
 
 /* ---------------------------------------------------------
@@ -1024,10 +1042,41 @@ function renderAdmin(){
   });
 
   renderQueue(custom, nextKind);
+
+  const tgCfg = CONFIG.telegram;
+  const tgEl = $('#tgState');
+  if(tgEl){
+    tgEl.textContent = tgCfg.enabled && tgCfg.token && tgCfg.chatId
+      ? 'Telegram: включён ✓ — уведомления приходят тебе в чат'
+      : 'Telegram: выключен — впиши token и chatId в CONFIG';
+  }
 }
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+/* ---------------------------------------------------------
+   TELEGRAM
+   Самый простой вариант: браузер шлёт сообщение прямо в Bot API.
+   Токен лежит в коде страницы — для личного подарка нормально,
+   но не используй бота, у которого есть доступ к чему-то важному.
+   --------------------------------------------------------- */
+async function tg(text){
+  const c = CONFIG.telegram;
+  if(!c.enabled || !c.token || !c.chatId) return;
+  try{
+    await fetch(`https://api.telegram.org/bot${c.token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: c.chatId,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+      })
+    });
+  }catch(e){ /* нет сети — данные всё равно в его localStorage */ }
 }
 
 /* ---------------------------------------------------------
