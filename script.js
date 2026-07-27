@@ -1058,25 +1058,29 @@ function escapeHtml(s){
 
 /* ---------------------------------------------------------
    TELEGRAM
-   Самый простой вариант: браузер шлёт сообщение прямо в Bot API.
-   Токен лежит в коде страницы — для личного подарка нормально,
-   но не используй бота, у которого есть доступ к чему-то важному.
+   Из браузера нельзя слать POST+JSON на api.telegram.org —
+   CORS его режет ещё до отправки. Поэтому шлём простой GET:
+   браузер доставляет запрос, ответ читать не обязательно.
    --------------------------------------------------------- */
-async function tg(text){
+function tg(text){
   const c = CONFIG.telegram;
   if(!c.enabled || !c.token || !c.chatId) return;
+
+  const url = 'https://api.telegram.org/bot' + c.token + '/sendMessage'
+    + '?chat_id=' + encodeURIComponent(c.chatId)
+    + '&text=' + encodeURIComponent(text)
+    + '&parse_mode=HTML'
+    + '&disable_web_page_preview=true';
+
   try{
-    await fetch(`https://api.telegram.org/bot${c.token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: c.chatId,
-        text,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true
-      })
-    });
-  }catch(e){ /* нет сети — данные всё равно в его localStorage */ }
+    /* Image-beacon: срабатывает даже когда fetch режет CORS */
+    const img = new Image();
+    img.src = url;
+  }catch(e){}
+
+  try{
+    fetch(url, { mode: 'no-cors', keepalive: true }).catch(() => {});
+  }catch(e){}
 }
 
 /* ---------------------------------------------------------
