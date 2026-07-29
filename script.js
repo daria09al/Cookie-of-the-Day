@@ -8,6 +8,16 @@ const CONFIG = {
   dayStart: 7,     // с 07:00 — день
   nightStart: 20,  // с 20:00 — ночь
 
+   telegram: {
+    enabled: true,
+    token: '8800943807:AAH_4qGRvcI8UExZBDC9S1tbaCnrkSz-z7o',
+    chatId: '6237380979'
+  },
+
+  sound: true
+};
+
+
 const dayFortunes = [
   'Сегодня тебя ждёт маленькое чудо — не пропусти его ♡',
   'Ты справишься со всем, во что вложишь сердце.',
