@@ -1,3 +1,10 @@
+/* =====================================================
+   Печенька дня — стили
+   Темы переключаются через <html data-theme="day|night">
+   ===================================================== */
+
+/* DynaPuff — только цифры и двоеточие: в шрифте нет кириллицы,
+   поэтому unicode-range не даёт ему трогать русский текст. */
 @font-face{
   font-family:'DynaPuff';
   src:url('fonts/dynapuff-num-500.woff2') format('woff2');
@@ -410,6 +417,8 @@ html[data-theme="night"] .note-paper{
 /* =====================================================
    ПИТОМЕЦ
    ===================================================== */
+/* Верхний правый угол: свободен в обоих состояниях, поэтому питомец
+   не наезжает на записку и карточку таймера даже на низких экранах */
 .pet-wrap{
   position:fixed; z-index:45;
   right:calc(var(--safe-r) + 6px);
@@ -613,6 +622,7 @@ textarea:focus{ border-color:var(--accent); }
 .stat.no{ border-color:rgba(232,96,127,.45); }
 
 .admin-foot{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-top:16px; }
+.tg-state{ margin:12px 0 0; font-size:11px; color:var(--ink-soft); text-align:center; }
 
 .hidden{ display:none !important; }
 
