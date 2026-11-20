@@ -10,9 +10,10 @@ const CONFIG = {
   nightStart: 20,  // с 20:00 — ночь
    
   telegram: {
-    enabled: true,
-    token: '8800943807:AAH_4qGRvcI8UExZBDC9S1tbaCnrkSz-z7o',
-    chatId: '6237380979'
+    // Never put the bot token here: this file is public.
+    enabled: false,
+    token: '',
+    chatId: ''
   },
 
   sound: true
